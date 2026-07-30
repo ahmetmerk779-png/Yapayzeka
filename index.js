@@ -26,7 +26,7 @@ function addLog(text) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Sade, düz, temiz ve modern admin paneli arayüzü
+// Sade ve Düzgün Panel
 app.get('/', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -54,7 +54,9 @@ app.get('/', (req, res) => {
             <div class="container">
                 <div class="card">
                     <h2>Bot Bilgileri</h2>
-                    <div class="info-row"><span class="info-label">Sunucu:</span><span class="info-value">play.aesirmc.com</span></div>
+                    <div class="info-row"><span class="info-label">Sunucu IP:</span><span class="info-value">play.aesirmc.com</span></div>
+                    <div class="info-row"><span class="info-label">Port:</span><span class="info-value">25565</span></div>
+                    <div class="info-row"><span class="info-label">Sürüm:</span><span class="info-value">1.21.1</span></div>
                     <div class="info-row"><span class="info-label">Durum:</span><span class="info-value" style="color: #2ecc71;">Aktif</span></div>
                 </div>
                 <div class="card">
