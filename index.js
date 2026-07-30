@@ -1,5 +1,5 @@
 const mineflayer = require('mineflayer');
-const { pathfinder, Movements, goals } = require('mineflayer-pathfinder');
+const { pathfinder } = require('mineflayer-pathfinder');
 const collectBlock = require('mineflayer-collectblock');
 const armorManager = require('mineflayer-armor-manager');
 const autoEat = require('mineflayer-auto-eat');
@@ -8,7 +8,6 @@ const http = require('http');
 const Groq = require('groq-sdk');
 
 // --- GROQ AI BEYİN KURULUMU ---
-// Render Environment Variables kısmına GROQ_API_KEY ekleyeceksin.
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || 'api_key_buraya' });
 
 // --- WEB PANELİ VE RENDER KEEP-ALIVE ALTYAPISI ---
@@ -91,31 +90,29 @@ function createBot() {
     bot = mineflayer.createBot({
         host: 'play.aesirmc.com',
         port: 25565,
-        username: 'BotKullaniciAdi', // Buraya botun ismini yazacaksın
+        username: 'BotKullaniciAdi',
         version: '1.21.1'
     });
 
+    // Doğru plugin yükleme formatı (Hata burada çözüldü)
     bot.loadPlugin(pathfinder);
-    bot.loadPlugin(collectBlock.plugin);
+    bot.loadPlugin(collectBlock);
     bot.loadPlugin(armorManager);
     bot.loadPlugin(autoEat);
 
     bot.once('spawn', () => {
         addLog('Bot lobiye/proxy girişine başarıyla spawn oldu.');
         
-        // 1. Adım: Otomatik Login
         setTimeout(() => {
             bot.chat('/login SifrenizBuraya123');
             addLog('Auth şifresi gönderildi.');
         }, 2000);
 
-        // 2. Adım: GUI veya NPC ile Prison Geçişi
         setTimeout(() => {
             handlePrisonTransition();
         }, 5000);
     });
 
-    // Captcha / Sandık Doğrulama Algılama
     bot.on('windowOpen', (window) => {
         addLog('Dikkat: Bir GUI penceresi / Captcha algılandı!');
         const title = window.title ? JSON.parse(window.title).text : 'Bilinmeyen Menü';
@@ -132,7 +129,6 @@ function createBot() {
         }
     });
 
-    // Sohbet ve Groq AI Entegrasyonu
     bot.on('chat', async (username, message) => {
         if (username === bot.username) return;
         addLog(`[Chat] <${username}>: ${message}`);
@@ -152,7 +148,6 @@ function createBot() {
         }
     });
 
-    // Otomatik Yeniden Bağlanma (Auto-Reconnect)
     bot.on('end', (reason) => {
         addLog(`Bağlantı koptu! Sebep: ${reason}`);
         addLog('10 saniye sonra yeniden bağlanılıyor...');
@@ -177,5 +172,4 @@ function handlePrisonTransition() {
     }
 }
 
-// Botu başlat
 createBot();
