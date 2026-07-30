@@ -7,10 +7,8 @@ const express = require('express');
 const http = require('http');
 const Groq = require('groq-sdk');
 
-// --- GROQ AI BEYİN KURULUMU ---
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || 'api_key_buraya' });
 
-// --- WEB PANELİ VE RENDER KEEP-ALIVE ALTYAPISI ---
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
@@ -49,7 +47,7 @@ app.get('/', (req, res) => {
         <body>
             <div class="card">
                 <h2>🤖 Bot Durum Paneli</h2>
-                <p><b>Sunucu:</b> play.aesirmc.com (Proxy)</p>
+                <p><b>Sunucu:</b> play.aesirmc.com</p>
                 <p><b>Durum:</b> <span style="color: #4CAF50;">Aktif / Otonom Çalışıyor</span></p>
             </div>
             <div class="card">
@@ -81,11 +79,10 @@ server.listen(PORT, () => {
     console.log(`Web paneli ${PORT} portunda aktif.`);
 });
 
-// --- BOT ÇEKİRDEK MİMARİSİ ---
 let bot;
 
 function createBot() {
-    addLog('Proxy sunucusuna bağlanılıyor...');
+    addLog('Sunucuya bağlanılıyor...');
     
     bot = mineflayer.createBot({
         host: 'play.aesirmc.com',
@@ -94,14 +91,19 @@ function createBot() {
         version: '1.21.1'
     });
 
-    // Doğru plugin yükleme formatı (Hata burada çözüldü)
-    bot.loadPlugin(pathfinder);
-    bot.loadPlugin(collectBlock);
-    bot.loadPlugin(armorManager);
-    bot.loadPlugin(autoEat);
+    // Eklenti çakışmalarını önleyen güvenli yükleme
+    try {
+        if (pathfinder) bot.loadPlugin(pathfinder);
+        if (collectBlock && collectBlock.plugin) bot.loadPlugin(collectBlock.plugin);
+        else if (collectBlock) bot.loadPlugin(collectBlock);
+        if (armorManager) bot.loadPlugin(armorManager);
+        if (autoEat) bot.loadPlugin(autoEat);
+    } catch (e) {
+        addLog('Plugin yükleme uyarısı: ' + e.message);
+    }
 
     bot.once('spawn', () => {
-        addLog('Bot lobiye/proxy girişine başarıyla spawn oldu.');
+        addLog('Bot oyuna başarıyla spawn oldu.');
         
         setTimeout(() => {
             bot.chat('/login SifrenizBuraya123');
@@ -123,7 +125,7 @@ function createBot() {
             const item = slots[i];
             if (item && (item.name.includes('emerald') || item.name.includes('diamond'))) {
                 bot.clickWindow(i, 0, 0);
-                addLog(`Captcha/Menü içinde ${item.name} eşyasına tıklandı.`);
+                addLog(`Menü içinde ${item.name} eşyasına tıklandı.`);
                 break;
             }
         }
@@ -160,11 +162,11 @@ function createBot() {
 }
 
 function handlePrisonTransition() {
-    addLog('Prison moduna geçiş aranıyor (GUI / Pusula / Komut)...');
+    addLog('Prison moduna geçiş aranıyor...');
     const compass = bot.inventory.items().find(item => item.name.includes('compass') || item.name.includes('star') || item.name.includes('clock'));
     if (compass) {
         bot.clickWindow(compass.slot, 0, 0).then(() => {
-            addLog('Geçiş eşyasına (pusula vb.) sağ tıklandı.');
+            addLog('Geçiş eşyasına tıklandı.');
         });
     } else {
         bot.chat('/server prison');
