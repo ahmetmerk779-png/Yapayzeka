@@ -1,16 +1,39 @@
 import { Bot } from "mineflayer";
+import { Movements, goals } from "mineflayer-pathfinder";
 
 export class BotActions {
   private bot: Bot;
-  constructor(bot: Bot) { this.bot = bot; }
-
-  public async speak(message: string): Promise<string> {
-    this.bot.chat(message);
-    return `Mesaj atıldı: ${message}`;
+  
+  constructor(bot: Bot) { 
+    this.bot = bot; 
   }
 
-  public async stop(): Promise<string> {
-    (this.bot as any).pathfinder?.stop();
-    return "Durdu.";
+  public async speak(message: string): Promise<void> {
+    if (message) this.bot.chat(message);
+  }
+
+  public async gotoPlayer(playerName: string): Promise<void> {
+    const target = this.bot.players[playerName]?.entity;
+    
+    if (!target) {
+      this.bot.chat(`${playerName}, seni göremiyorum! Çok mu uzaksın?`);
+      return;
+    }
+    
+    const mcData = require('minecraft-data')(this.bot.version);
+    const defaultMove = new Movements(this.bot, mcData);
+    
+    defaultMove.canDig = false; 
+    defaultMove.allow1by1towers = false;
+
+    // @ts-ignore
+    this.bot.pathfinder.setMovements(defaultMove);
+    // @ts-ignore
+    this.bot.pathfinder.setGoal(new goals.GoalNear(target.position.x, target.position.y, target.position.z, 1.5));
+  }
+
+  public async stop(): Promise<void> {
+    // @ts-ignore
+    this.bot.pathfinder.setGoal(null);
   }
 }
