@@ -16,24 +16,62 @@ export class BotActions {
     const target = this.bot.players[playerName]?.entity;
     
     if (!target) {
-      this.bot.chat(`${playerName}, seni göremiyorum! Çok mu uzaksın?`);
+      this.bot.chat(`${playerName}, seni etrafımda göremiyorum! Çok mu uzaktasın?`);
       return;
     }
     
-    // Doğru kullanım: Sadece bot nesnesi verilir
     const defaultMove = new Movements(this.bot);
-    
-    defaultMove.canDig = false; 
-    defaultMove.allow1by1towers = false;
+    defaultMove.canDig = true; 
+    defaultMove.allow1by1towers = true;
 
     // @ts-ignore
     this.bot.pathfinder.setMovements(defaultMove);
     // @ts-ignore
-    this.bot.pathfinder.setGoal(new goals.GoalNear(target.position.x, target.position.y, target.position.z, 1.5));
+    this.bot.pathfinder.setGoal(new goals.GoalNear(target.position.x, target.position.y, target.position.z, 2));
+  }
+
+  public async digBlock(blockName: string): Promise<void> {
+    const mcData = require('minecraft-data')(this.bot.version);
+    const blockType = mcData.blocksByName[blockName];
+    
+    if (!blockType) {
+      this.bot.chat(`${blockName} adında bir blok türü bulamadım.`);
+      return;
+    }
+
+    const block = this.bot.findBlock({
+      matching: blockType.id,
+      maxDistance: 32
+    });
+
+    if (!block) {
+      this.bot.chat(`Yakınlarda kazacak ${blockName} bulamadım.`);
+      return;
+    }
+
+    this.bot.chat(`${blockName} bloğunu buldum, kazmaya gidiyorum.`);
+    const defaultMove = new Movements(this.bot);
+    // @ts-ignore
+    this.bot.pathfinder.setMovements(defaultMove);
+    // @ts-ignore
+    this.bot.pathfinder.setGoal(new goals.GoalGetToBlock(block.position.x, block.position.y, block.position.z));
+
+    // @ts-ignore
+    this.bot.pathfinder.once('goal_reached', async () => {
+      try {
+        if (this.bot.canDig(block)) {
+          await this.bot.dig(block);
+          this.bot.chat(`${blockName} başarıyla kazıldı!`);
+        }
+      } catch (err) {
+        console.error("Kazma hatası:", err);
+      }
+    });
   }
 
   public async stop(): Promise<void> {
     // @ts-ignore
     this.bot.pathfinder.setGoal(null);
+    this.bot.chat("Duraklatıldı.");
   }
 }
