@@ -1,4 +1,8 @@
-import { MemoryEntry } from "../types";
+export interface MemoryEntry {
+  timestamp: string;
+  speaker: string;
+  message: string;
+}
 
 export class MemoryManager {
   private chatHistory: MemoryEntry[] = [];
@@ -17,10 +21,6 @@ export class MemoryManager {
   }
 
   public getFormattedChatHistory(): string {
-    return this.chatHistory.length === 0 ? "Sohbet geçmişi yok." : this.chatHistory.map(e => `[${e.timestamp}] ${e.speaker}: ${e.message}`).join("\n");
-  }
-
-  public getFormattedEvents(): string {
-    return this.importantEvents.length === 0 ? "Olay geçmişi yok." : this.importantEvents.join("\n");
+    return this.chatHistory.length === 0 ? "Sohbet boş." : this.chatHistory.map(e => `[${e.timestamp}] ${e.speaker}: ${e.message}`).join("\n");
   }
 }
