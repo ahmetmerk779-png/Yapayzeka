@@ -5,8 +5,8 @@ import { processAiDecision } from "../ai/groq";
 
 export function setupBotEvents(bot: Bot, actions: BotActions, memory: MemoryManager): void {
   bot.on("spawn", () => {
-    console.log("Bot oyuna katıldı.");
-    memory.addEvent("Bot sunucuya giriş yaptı.");
+    console.log(`[+] ${bot.username} sunucuya giriş yaptı.`);
+    memory.addEvent("Bot oyuna giriş yaptı.");
   });
 
   bot.on("chat", async (username, message) => {
@@ -14,18 +14,36 @@ export function setupBotEvents(bot: Bot, actions: BotActions, memory: MemoryMana
 
     memory.addChatMessage(username, message);
 
-    if (message.includes(bot.username)) {
-      const userPrompt = `${username} sana dedi ki: ${message}`;
-      await processAiDecision(bot, actions, memory, userPrompt);
+    if (message.toLowerCase().includes(bot.username.toLowerCase())) {
+      const userPrompt = `${username}: ${message}`;
+      
+      const aiResponse = await processAiDecision(bot, memory, userPrompt);
+      if (!aiResponse) return;
+
+      const commandRegex = /\[(.*?)\]/;
+      const match = aiResponse.match(commandRegex);
+      
+      const cleanMessage = aiResponse.replace(commandRegex, "").trim();
+      if (cleanMessage) {
+        await actions.speak(cleanMessage);
+      }
+
+      if (match) {
+        const fullCommand = match[1]; 
+        const [action, target] = fullCommand.split(":");
+
+        switch (action.toUpperCase()) {
+          case "GOTO":
+            await actions.gotoPlayer(target);
+            break;
+          case "DUR":
+            await actions.stop();
+            break;
+        }
+      }
     }
   });
 
-  bot.on("kicked", (reason) => {
-    console.log("Bot sunucudan atıldı:", reason);
-    memory.addEvent(`Sunucudan atıldı: ${reason}`);
-  });
-
-  bot.on("error", (err) => {
-    console.error("Bot hatası:", err);
-  });
+  bot.on("kicked", (reason) => console.log("Atıldı:", reason));
+  bot.on("error", (err) => console.error("Bot hatası:", err));
 }
