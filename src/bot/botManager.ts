@@ -18,7 +18,7 @@ export function startBot(host: string, port: number, username: string) {
     host: host,
     port: port,
     username: username,
-    version: "1.21.11" // Sürüm sabitlendi
+    version: "1.21.11"
   });
 
   activeBot.loadPlugin(pathfinder);
