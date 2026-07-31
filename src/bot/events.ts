@@ -5,8 +5,8 @@ import { processAiDecision } from "../ai/groq";
 
 export function setupBotEvents(bot: Bot, actions: BotActions, memory: MemoryManager): void {
   bot.on("spawn", () => {
-    console.log(`[+] ${bot.username} sunucuya giriş yaptı.`);
-    memory.addEvent("Bot oyuna giriş yaptı.");
+    console.log(`[+] ${bot.username} oyuna katıldı.`);
+    memory.addEvent("Bot dünyaya başarılı bir şekilde giriş yaptı.");
   });
 
   bot.on("chat", async (username, message) => {
@@ -36,6 +36,9 @@ export function setupBotEvents(bot: Bot, actions: BotActions, memory: MemoryMana
           case "GOTO":
             await actions.gotoPlayer(target);
             break;
+          case "KAZ":
+            await actions.digBlock(target);
+            break;
           case "DUR":
             await actions.stop();
             break;
@@ -44,6 +47,10 @@ export function setupBotEvents(bot: Bot, actions: BotActions, memory: MemoryMana
     }
   });
 
-  bot.on("kicked", (reason) => console.log("Atıldı:", reason));
+  bot.on("kicked", (reason) => {
+    console.log("Atılma nedeni:", reason);
+    memory.addEvent(`Sunucudan atıldı: ${reason}`);
+  });
+
   bot.on("error", (err) => console.error("Bot hatası:", err));
 }
