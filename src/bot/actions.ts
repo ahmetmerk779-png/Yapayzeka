@@ -59,8 +59,9 @@ export class BotActions {
     // @ts-ignore
     this.bot.pathfinder.once('goal_reached', async () => {
       try {
-        if (this.bot.canDig(block)) {
-          await this.bot.dig(block);
+        // Tip denetimini es geçmek için as any kullanıyoruz
+        if ((this.bot as any).canDig(block)) {
+          await (this.bot as any).dig(block);
           this.bot.chat(`${blockName} başarıyla kazıldı!`);
         }
       } catch (err) {
