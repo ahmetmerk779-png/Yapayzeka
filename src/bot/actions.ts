@@ -20,8 +20,8 @@ export class BotActions {
       return;
     }
     
-    const mcData = require('minecraft-data')(this.bot.version);
-    const defaultMove = new Movements(this.bot, mcData);
+    // Doğru kullanım: Sadece bot nesnesi verilir
+    const defaultMove = new Movements(this.bot);
     
     defaultMove.canDig = false; 
     defaultMove.allow1by1towers = false;
