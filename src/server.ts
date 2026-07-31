@@ -8,14 +8,12 @@ export function startServer(port: number) {
   
   app.use(cors());
   app.use(express.json());
-  
-  // Render'da dist içine derlendiğinde public klasörünü bulabilmesi için process.cwd() kullanıyoruz
   app.use(express.static(path.join(process.cwd(), "public")));
 
   app.post("/api/connect", (req, res) => {
     const { ip, port, username } = req.body;
     startBot(ip, port, username);
-    res.json({ success: true, message: "Bot sunucuya giriş komutu aldı." });
+    res.json({ success: true, message: "Bot sunucuya bağlantı başlattı." });
   });
 
   app.get("/api/status", (req, res) => {
@@ -23,6 +21,6 @@ export function startServer(port: number) {
   });
 
   app.listen(port, () => {
-    console.log(`🚀 Web Kontrol Paneli Yayında! Port: ${port}`);
+    console.log(`🚀 Kontrol Paneli Aktif: Port ${port}`);
   });
 }
